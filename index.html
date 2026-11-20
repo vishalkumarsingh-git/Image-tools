@@ -22,12 +22,49 @@ footer{display:flex;justify-content:space-between;gap:15px;margin-top:26px;color
 #fileInput{display:none}.mobile-menu{display:none}
 @media(max-width:980px){.layout{grid-template-columns:1fr}.sidebar{position:static}.tool-nav{grid-template-columns:repeat(3,minmax(0,1fr))}.tool-btn{font-size:12px}.side-note{display:none}.editor-grid{grid-template-columns:1fr 230px}}
 @media(max-width:680px){.shell{padding-top:18px}header{margin-bottom:30px}.status{display:none}.editor-grid{grid-template-columns:1fr}.preview{min-height:300px}.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tool-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace-head{align-items:flex-start}footer{flex-direction:column}}
+
+/* Account, AI and metadata workspace */
+.account-ai{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:14px;margin:0 0 22px}
+.feature-card{background:#111522d9;border:1px solid var(--line);border-radius:18px;padding:18px;backdrop-filter:blur(22px)}
+.feature-card h2{font-size:16px;margin:0 0 5px}.feature-card .sub{font-size:12px;color:var(--muted);margin:0 0 14px}
+.api-row{display:grid;grid-template-columns:minmax(0,1fr) 145px;gap:9px}
+.feature-card input,.feature-card select,.meta-grid input,.meta-grid select{width:100%;min-width:0;background:#1b2232;border:1px solid #343e53;border-radius:10px;color:white;padding:11px}
+.feature-card input:focus,.feature-card select:focus,.meta-grid input:focus{outline:2px solid #9b8cff66;border-color:#a99aff}
+.account-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.info-box{margin-top:12px;padding:11px 12px;border:1px solid #34304f;background:#211f35;border-radius:12px;color:#c7c2e8;font-size:11px}
+.auth-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.auth-status{font-size:11px;color:var(--accent2);margin-top:9px;min-height:16px}
+.metadata{margin-top:20px}.metadata-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.metadata-head h2{font-size:18px;margin:0}.meta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:15px}
+.meta-field label{display:block;font-size:11px;color:#bfc7d8;margin-bottom:6px}.meta-field.wide{grid-column:span 2}
+.meta-note{font-size:11px;color:var(--muted);margin:10px 0 0}.meta-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+@media(max-width:800px){.account-ai{grid-template-columns:1fr}.meta-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.api-row,.auth-fields{grid-template-columns:1fr}.meta-grid{grid-template-columns:1fr}.meta-field.wide{grid-column:auto}}
+
 </style>
 </head>
 <body>
 <div class="shell">
 <header><div class="brand"><div class="brandmark">P.</div><div>Programming Blitz.<small>Creative tools</small></div></div><div class="header-right"><div class="status"><i></i>Local editing ready</div><div class="status">Image Studio · Preview</div></div></header>
 <section class="hero"><div class="eyebrow">Your visual workspace</div><h1>Make every image<br><span style="background:linear-gradient(100deg,#b2a6ff,#75e8d5);background-clip:text;color:transparent">look its best.</span></h1><p>A focused workspace for image enhancement, editing and conversion. Start with an image — more AI-powered tools are coming.</p></section>
+
+<section class="account-ai" aria-label="Account and AI connection">
+ <div class="feature-card">
+  <h2>AI connection</h2><p class="sub">Connect your Gemini API when your secure AI endpoint is configured.</p>
+  <div class="api-row">
+   <input id="aiApiKey" type="password" autocomplete="off" placeholder="Your API key" aria-label="Your AI API key">
+   <select id="aiModel" aria-label="AI model"><option value="gemini-2.5-flash">Gemini 2.5 Flash</option><option value="gemini-2.5-pro">Gemini 2.5 Pro</option><option value="gemini-2.0-flash">Gemini 2.0 Flash</option></select>
+  </div>
+  <div class="account-actions"><button class="primary" id="connectAiBtn">Connect AI</button><button class="secondary" id="clearAiBtn">Clear key</button></div>
+  <div class="info-box"><strong>Info</strong><br>AI requests are not enabled yet. The key is kept only in this browser tab and is not saved to your account or database. A server-side proxy is required before sending real Gemini requests.</div>
+ </div>
+ <div class="feature-card">
+  <h2>Cloud account</h2><p class="sub">Sign in to sync your preferences and editing history.</p>
+  <div class="auth-fields"><input id="accountEmail" type="email" placeholder="Email address" autocomplete="email"><input id="accountPassword" type="password" placeholder="Password" autocomplete="current-password"></div>
+  <div class="account-actions"><button class="primary" id="signInBtn">Sign in</button><button class="secondary" id="signUpBtn">Create account</button><button class="secondary" id="signOutBtn" hidden>Sign out</button></div>
+  <div class="auth-status" id="authStatus" role="status" aria-live="polite">Cloud sync is not configured yet.</div>
+  <p class="meta-note">Account storage uses Supabase. Add your project URL and public anon key in the setup file after creating a free project.</p>
+ </div>
+</section>
 <div class="layout">
 <aside class="sidebar"><div class="side-label">Workspace</div><nav class="tool-nav" aria-label="Image tools">
 <button class="tool-btn active" data-tool="editor"><span class="tool-icon">✦</span> Image editor</button>
@@ -54,9 +91,30 @@ footer{display:flex;justify-content:space-between;gap:15px;margin-top:26px;color
 <div class="control"><label for="blur">Blur <output id="blurVal">0px</output></label><input id="blur" type="range" min="0" max="10" value="0"></div>
 <div class="control"><label for="format">Export format</label><select id="format"><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option><option value="image/webp">WebP</option></select></div>
 <div class="control"><label for="quality">Export quality <output id="qualityVal">92%</output></label><input id="quality" type="range" min="40" max="100" value="92"></div>
+
+<div class="control"><label for="resizeWidth">Resize width (px)</label><input id="resizeWidth" type="number" min="1" max="12000" placeholder="Original width"></div>
+<div class="control"><label for="resizeHeight">Resize height (px)</label><input id="resizeHeight" type="number" min="1" max="12000" placeholder="Original height"></div>
+<div class="control"><label><span><input id="keepRatio" type="checkbox" checked style="width:auto;accent-color:#a99aff"> Keep aspect ratio</span></label></div>
 <button class="primary" style="width:100%" id="applyBtn">Apply adjustments</button>
 <p style="font-size:10px;color:#77839a;margin:12px 0 0">Adjustments are applied during export. Original file remains unchanged.</p>
 </aside></div></main></div>
+
+<section class="feature-card metadata" aria-label="Metadata editor">
+ <div class="metadata-head"><div><h2>Metadata editor</h2><p class="sub">Read and edit common photo metadata. Export writes EXIF to JPEG files.</p></div><button class="secondary" id="readMetaBtn">Read image metadata</button></div>
+ <div class="meta-grid">
+  <div class="meta-field"><label for="deviceCategory">Device category</label><select id="deviceCategory"><option value="phone">Smartphone</option><option value="camera">Camera</option><option value="glasses">Smart glasses</option><option value="action">Action camera</option><option value="drone">Other device</option></select></div>
+  <div class="meta-field wide"><label for="devicePreset">Device preset</label><select id="devicePreset"><option value="">Choose a device preset</option></select></div>
+  <div class="meta-field"><label for="metaMake">Make / brand</label><input id="metaMake" placeholder="e.g. Samsung"></div>
+  <div class="meta-field"><label for="metaModel">Model</label><input id="metaModel" placeholder="e.g. Galaxy S24 Ultra"></div>
+  <div class="meta-field"><label for="metaLens">Lens model</label><input id="metaLens" placeholder="Optional"></div>
+  <div class="meta-field"><label for="metaDate">Date taken</label><input id="metaDate" type="datetime-local"></div>
+  <div class="meta-field"><label for="metaArtist">Creator / artist</label><input id="metaArtist" placeholder="Optional"></div>
+  <div class="meta-field"><label for="metaCopyright">Copyright</label><input id="metaCopyright" placeholder="Optional"></div>
+  <div class="meta-field wide"><label for="metaDescription">Image description</label><input id="metaDescription" placeholder="Optional description"></div>
+ </div>
+ <div class="meta-actions"><button class="primary" id="exportMetaBtn">Export with metadata (JPEG)</button><button class="secondary" id="clearMetaBtn">Clear metadata fields</button></div>
+ <p class="meta-note">Device presets only fill editable text fields. They do not prove which device captured a photo. Metadata editing is currently supported for JPEG export; other formats keep using the regular export controls. Location metadata is intentionally not added automatically.</p>
+</section>
 <footer><span>© 2026 Programming Blitz. All rights reserved.</span><span>Built for creativity · <a href="https://github.com/vishalkumarsingh-git/Image-tools">GitHub repository</a></span></footer>
 </div><div class="toast" id="toast" role="status" aria-live="polite"></div><input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
 <script>
@@ -77,5 +135,59 @@ const toolInfo={editor:['Image editor','Upload an image to begin editing.'],enha
 function selectTool(key){const info=toolInfo[key]||toolInfo.editor;$('toolTitle').textContent=info[0];$('toolDescription').textContent=info[1];document.querySelectorAll('.tool-btn').forEach(b=>b.classList.toggle('active',b.dataset.tool===key));if(['enhance','background','remove'].includes(key))notify('This AI feature will be enabled after Gemini API setup.');else if(key==='resize')notify('Resize controls are planned for the next update.')}
 document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>selectTool(b.dataset.tool)));
 updateFilter();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/piexifjs@1.0.4/piexif.js"></script>
+<script>
+/* Supabase public client configuration. These are public browser values; never put a service-role key here. */
+const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+let cloudClient = null, cloudUser = null;
+const devicePresets = {
+ phone:[
+  ["Apple","iPhone 15 Pro"],["Apple","iPhone 16 Pro"],["Apple","iPhone 17 Pro"],
+  ["Samsung","Galaxy S23 Ultra"],["Samsung","Galaxy S24 Ultra"],["Samsung","Galaxy S25 Ultra"],
+  ["Google","Pixel 8 Pro"],["Google","Pixel 9 Pro"],["Google","Pixel 10 Pro"],
+  ["OnePlus","OnePlus 12"],["OnePlus","OnePlus 13"],["Xiaomi","Xiaomi 14 Ultra"],["Xiaomi","Xiaomi 15 Ultra"],
+  ["Motorola","Edge 50 Ultra"],["Nothing","Phone (2)"]
+ ],
+ camera:[
+  ["Canon","EOS R5"],["Canon","EOS R6 Mark II"],["Canon","EOS R7"],["Nikon","Z8"],["Nikon","Z6 III"],
+  ["Sony","ILCE-7M4 (A7 IV)"],["Sony","ILCE-7RM5 (A7R V)"],["Sony","ZV-E10 II"],
+  ["Fujifilm","X-T5"],["Fujifilm","X100VI"],["Panasonic","Lumix S5II"],["OM System","OM-1 Mark II"],
+  ["Leica","Q3"],["Hasselblad","X2D 100C"]
+ ],
+ glasses:[
+  ["Meta","Ray-Ban Meta Wayfarer"],["Meta","Ray-Ban Meta Headliner"],["Meta","Oakley Meta HSTN"],
+  ["Snap","Spectacles"],["XREAL","Air 2 Ultra"],["VITURE","Pro XR Glasses"]
+ ],
+ action:[
+  ["GoPro","HERO12 Black"],["GoPro","HERO13 Black"],["DJI","Osmo Action 5 Pro"],["Insta360","X4"]
+ ],
+ drone:[["DJI","Mavic 3 Pro"],["DJI","Mini 4 Pro"],["Autel","EVO Lite+" ]]
+};
+const categorySelect=document.getElementById('deviceCategory'),presetSelect=document.getElementById('devicePreset');
+function fillPresets(){const items=devicePresets[categorySelect.value]||[];presetSelect.innerHTML='<option value="">Choose a device preset</option>'+items.map((p,i)=>'<option value="'+i+'">'+p[0]+' · '+p[1]+'</option>').join('')}
+categorySelect.addEventListener('change',fillPresets);fillPresets();
+presetSelect.addEventListener('change',()=>{const p=(devicePresets[categorySelect.value]||[])[Number(presetSelect.value)];if(!p)return;document.getElementById('metaMake').value=p[0];document.getElementById('metaModel').value=p[1]});
+function dataUrlFromCanvas(){if(!sourceImage)return null;const w=sourceImage.naturalWidth,h=sourceImage.naturalHeight;let outW=Number(document.getElementById('resizeWidth').value)||w,outH=Number(document.getElementById('resizeHeight').value)||h;outW=Math.min(12000,Math.max(1,outW));outH=Math.min(12000,Math.max(1,outH));if(document.getElementById('keepRatio').checked){if(document.activeElement.id==='resizeHeight')outW=Math.round(outH*w/h);else outH=Math.round(outW*h/w)}const swap=rotation%180!==0,c=document.createElement('canvas');c.width=swap?outH:outW;c.height=swap?outW:outH;const x=c.getContext('2d');x.translate(c.width/2,c.height/2);x.rotate(rotation*Math.PI/180);x.scale(flip?-1:1,1);x.filter='brightness('+document.getElementById('brightness').value+'%) contrast('+document.getElementById('contrast').value+'%) saturate('+document.getElementById('saturation').value+'%) blur('+document.getElementById('blur').value+'px)';x.drawImage(sourceImage,-outW/2,-outH/2,outW,outH);return c.toDataURL('image/jpeg',Number(document.getElementById('quality').value)/100)}
+document.getElementById('resizeWidth').addEventListener('change',()=>{if(sourceImage&&document.getElementById('keepRatio').checked){const w=Number(document.getElementById('resizeWidth').value);document.getElementById('resizeHeight').value=Math.round(w*sourceImage.naturalHeight/sourceImage.naturalWidth)}});
+document.getElementById('resizeHeight').addEventListener('change',()=>{if(sourceImage&&document.getElementById('keepRatio').checked){const h=Number(document.getElementById('resizeHeight').value);document.getElementById('resizeWidth').value=Math.round(h*sourceImage.naturalWidth/sourceImage.naturalHeight)}});
+const metaIds=['metaMake','metaModel','metaLens','metaDate','metaArtist','metaCopyright','metaDescription'];
+function dateExif(v){if(!v)return '';return v.replace('T',' ')+':00'}
+function getMeta(){return Object.fromEntries(metaIds.map(id=>[id,document.getElementById(id).value.trim()]))}
+document.getElementById('clearMetaBtn').onclick=()=>{metaIds.forEach(id=>document.getElementById(id).value='');presetSelect.value=''};
+document.getElementById('readMetaBtn').onclick=async()=>{if(!sourceImage){notify('Upload a JPEG image first.');return}try{if(!window.piexif){notify('Metadata library did not load.');return}const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(fileInput.files[0])});const ex=piexif.load(data),z=ex['0th']||{},e=ex.Exif||{};document.getElementById('metaMake').value=z[piexif.ImageIFD.Make]||'';document.getElementById('metaModel').value=z[piexif.ImageIFD.Model]||'';document.getElementById('metaLens').value=e[piexif.ExifIFD.LensModel]||'';document.getElementById('metaArtist').value=z[piexif.ImageIFD.Artist]||'';document.getElementById('metaCopyright').value=z[piexif.ImageIFD.Copyright]||'';document.getElementById('metaDescription').value=z[piexif.ImageIFD.ImageDescription]||'';const dt=e[piexif.ExifIFD.DateTimeOriginal]||'';if(dt)document.getElementById('metaDate').value=dt.replace(/^([0-9]{4}):([0-9]{2}):([0-9]{2}) /,'$1-$2-$3T').slice(0,16);notify('JPEG metadata loaded.')}catch(err){notify('Could not read metadata. Use a JPEG with EXIF data.')}};
+document.getElementById('exportMetaBtn').onclick=()=>{if(!sourceImage){notify('Upload an image first.');return}if(!window.piexif){notify('Metadata library did not load.');return}try{const data=dataUrlFromCanvas(),ex=piexif.load(data),z=ex['0th']||{},e=ex.Exif||{},m=getMeta();const put=(obj,key,val)=>{if(val)obj[key]=val;else delete obj[key]};put(z,piexif.ImageIFD.Make,m.metaMake);put(z,piexif.ImageIFD.Model,m.metaModel);put(z,piexif.ImageIFD.Artist,m.metaArtist);put(z,piexif.ImageIFD.Copyright,m.metaCopyright);put(z,piexif.ImageIFD.ImageDescription,m.metaDescription);put(z,piexif.ImageIFD.Software,'Programming Blitz. Image Studio');put(e,piexif.ExifIFD.LensModel,m.metaLens);put(e,piexif.ExifIFD.DateTimeOriginal,dateExif(m.metaDate));put(e,piexif.ExifIFD.DateTimeDigitized,dateExif(m.metaDate));ex['0th']=z;ex.Exif=e;const out=piexif.insert(piexif.dump(ex),data),a=document.createElement('a');a.href=out;a.download=sourceName+'-metadata.jpg';a.click();notify('JPEG exported with edited metadata.');saveEditRecord('metadata-export')}catch(err){console.error(err);notify('Metadata export failed. Try a smaller JPEG image.')}};
+function initCloud(){if(!window.supabase||SUPABASE_URL.startsWith('YOUR_')||SUPABASE_ANON_KEY.startsWith('YOUR_')){document.getElementById('authStatus').textContent='Add Supabase project URL and anon key to enable account sign-in.';return}cloudClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);cloudClient.auth.getSession().then(({data})=>setCloudUser(data.session?.user||null));cloudClient.auth.onAuthStateChange((_event,session)=>setCloudUser(session?.user||null))}
+async function setCloudUser(user){cloudUser=user;const status=document.getElementById('authStatus');status.textContent=user?'Signed in as '+user.email+' · cloud sync enabled':'Not signed in';document.getElementById('signOutBtn').hidden=!user;document.getElementById('signInBtn').hidden=!!user;document.getElementById('signUpBtn').hidden=!!user;if(user){const {error}=await cloudClient.from('profiles').upsert({id:user.id,email:user.email,updated_at:new Date().toISOString()});if(error)status.textContent='Signed in, but profile sync needs the SQL setup: '+error.message}}
+async function authAction(kind){if(!cloudClient){notify('Configure Supabase first.');return}const email=document.getElementById('accountEmail').value.trim(),password=document.getElementById('accountPassword').value;if(!email||!password){notify('Enter your email and password.');return}const status=document.getElementById('authStatus');status.textContent='Please wait…';const result=kind==='signup'?await cloudClient.auth.signUp({email,password}):await cloudClient.auth.signInWithPassword({email,password});if(result.error){status.textContent=result.error.message;return}if(kind==='signup'&&!result.data.session)status.textContent='Account created. Check your email to confirm, then sign in.';else status.textContent='Account connected.'}
+document.getElementById('signInBtn').onclick=()=>authAction('signin');document.getElementById('signUpBtn').onclick=()=>authAction('signup');document.getElementById('signOutBtn').onclick=async()=>{if(cloudClient)await cloudClient.auth.signOut();};
+document.getElementById('connectAiBtn').onclick=()=>{const key=document.getElementById('aiApiKey').value.trim();if(!key){notify('Enter your API key first.');return}sessionStorage.setItem('pb_ai_model',document.getElementById('aiModel').value);notify('Model preference set for this tab. AI calls remain disabled until the secure server endpoint is configured.')};
+document.getElementById('clearAiBtn').onclick=()=>{document.getElementById('aiApiKey').value='';sessionStorage.removeItem('pb_ai_model');notify('API key cleared from the page.')};
+async function saveEditRecord(action){if(!cloudClient||!cloudUser)return;try{await cloudClient.from('edit_history').insert({user_id:cloudUser.id,action,filename:sourceName,created_at:new Date().toISOString()})}catch(e){console.warn('History sync failed',e)}}
+const originalDownload=document.getElementById('downloadBtn');originalDownload.addEventListener('click',()=>saveEditRecord('image-export'));
+initCloud();
 </script>
 </body></html>
